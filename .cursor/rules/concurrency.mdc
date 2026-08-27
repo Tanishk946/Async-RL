@@ -1,0 +1,63 @@
+---
+description: Concurrency, lifecycle, backpressure, and performance rules for async RL systems
+globs:
+  - "**/*.py"
+  - "**/*.go"
+alwaysApply: false
+---
+
+# Concurrency
+
+Before adding concurrency, identify:
+1. Producer
+2. Consumer
+3. Ownership
+4. Queue/buffer
+5. Capacity
+6. Cancellation mechanism
+7. Shutdown mechanism
+8. Failure propagation
+
+## Boundedness
+
+Prefer bounded:
+- queues
+- worker pools
+- connection pools
+- in-flight requests
+- task creation
+
+Any unbounded resource requires explicit justification.
+
+## Lifecycle
+
+Concurrent components should have an explicit lifecycle:
+
+    start -> running -> draining -> stopped
+
+Shutdown should be deterministic and testable.
+
+## Backpressure
+
+Backpressure should propagate toward producers.
+
+Do not hide overload by accumulating unbounded memory.
+
+Queue depth, wait time, and rejection/drop behavior should be observable.
+
+## Async Python
+
+Avoid:
+- blocking calls inside async functions
+- uncontrolled `create_task`
+- unbounded `gather`
+- busy polling
+
+## Go
+
+Avoid:
+- goroutine leaks
+- unbounded goroutine creation
+- channels with unclear ownership
+- shared mutable state without synchronization
+- goroutines with no shutdown path

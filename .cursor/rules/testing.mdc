@@ -1,0 +1,50 @@
+---
+description: Testing standards for Python, Go, concurrency, and RL infrastructure
+alwaysApply: false
+---
+
+# Testing
+
+Tests should validate behavior and invariants rather than implementation details.
+
+Behavioral changes involving any of the following require appropriate tests:
+- concurrency
+- cancellation
+- timeouts
+- retries
+- queue/backpressure behavior
+- trajectory schemas
+- serialization
+- worker lifecycle
+- error handling
+- policy/model versioning
+
+## Async
+
+Test:
+- successful completion
+- cancellation
+- timeout
+- producer failure
+- consumer failure
+- shutdown while work is active
+- bounded queue behavior
+
+Avoid arbitrary sleep-based synchronization.
+
+## Go concurrency
+
+Run:
+
+    go test -race ./...
+
+for concurrency-sensitive changes.
+
+## Regression tests
+
+A production bug should normally result in a regression test that would fail before the fix.
+
+## Verification
+
+Do not claim tests passed unless they were actually run.
+If a required check cannot run, report the reason explicitly.

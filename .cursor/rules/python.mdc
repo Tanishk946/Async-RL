@@ -1,0 +1,52 @@
+---
+description: Python engineering standards for RL, ML, async services, and infrastructure
+globs:
+  - "**/*.py"
+alwaysApply: false
+---
+
+# Python Engineering
+
+- Follow idiomatic modern Python and the project's configured formatter/linter.
+- Prefer small, composable functions and explicit data flow.
+- Add precise type annotations to public APIs.
+- Avoid `Any` unless there is a documented boundary that requires it.
+- Prefer dataclasses or typed structures for structured data.
+- Avoid mutable global state.
+
+## Async
+
+- Never perform blocking I/O directly on an async event loop.
+- Every created task must have a clear owner and lifecycle.
+- Cancellation must propagate; do not swallow `asyncio.CancelledError`.
+- Use bounded concurrency and explicit timeouts.
+- Avoid unbounded `asyncio.gather()` or task creation.
+- Prefer structured concurrency where practical.
+
+## Errors
+
+- Catch exceptions only when recovery or translation is meaningful.
+- Preserve exception context when re-raising.
+- Never use bare `except`.
+- Do not silently convert failures into `None`, empty values, or defaults.
+
+## Performance
+
+- Measure before optimizing.
+- Avoid unnecessary copies of tensors and large trajectory objects.
+- Make CPU/GPU/device transfers explicit.
+- Batch hot-path operations where practical.
+- Avoid accidental synchronization points.
+
+## Dependencies
+
+- Prefer existing project dependencies.
+- Do not add a dependency for trivial functionality.
+- Use the repository's package manager and lockfile.
+
+## Tests
+
+- Use the project's configured test framework.
+- Test failure modes as well as happy paths.
+- Async behavior needs explicit async tests.
+- Prefer deterministic synchronization over arbitrary sleeps.

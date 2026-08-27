@@ -1,0 +1,161 @@
+---
+description: Architecture and correctness rules for asynchronous RL rollouts and post-training
+alwaysApply: true
+---
+
+# Async RL Rollout Architecture
+
+The conceptual data flow is:
+
+    Environment
+        ->
+    Rollout Worker
+        ->
+    Policy / Inference
+        ->
+    Trajectory
+        ->
+    Transport / Buffer
+        ->
+    Learner
+
+Keep these boundaries explicit.
+
+## Trajectory ownership
+
+A trajectory must have a clear owner at every stage.
+
+Avoid concurrent mutation of a trajectory object unless ownership and synchronization are explicit.
+
+Prefer immutable or append-only representations where practical.
+
+## Trajectory identity and metadata
+
+Trajectory data should be attributable to:
+- a unique trajectory identifier
+- policy/model version
+- environment/version when applicable
+- rollout configuration
+- random seed when applicable
+- trajectory/schema version
+- useful worker identity
+- generation timestamp where useful
+
+Do not silently mix incompatible trajectory schemas or policy versions.
+
+## Backpressure
+
+Producer/consumer boundaries should be bounded unless there is a documented reason otherwise.
+
+When consumers fall behind:
+- producers should experience explicit backpressure
+- queue depth should be observable
+- memory growth must remain bounded
+- failures must not silently discard data
+
+Do not solve overload with an unbounded queue.
+
+## Cancellation
+
+Cancellation should propagate through:
+
+    request
+      -> rollout
+      -> inference
+      -> environment
+      -> serialization
+      -> transport
+
+A cancelled rollout must not remain alive indefinitely.
+
+## Timeouts
+
+External operations should have explicit deadlines where appropriate:
+- inference RPC
+- environment interaction
+- queue operations
+- network operations
+- checkpoint loading
+- trajectory writes
+
+Timeouts should be distinguishable from ordinary failures.
+
+## Retries and duplicates
+
+Only retry operations that are safe to retry.
+
+Before adding a retry, determine:
+1. Can it have side effects?
+2. Can the request be duplicated?
+3. Can duplicate trajectories reach the learner?
+4. Is the operation idempotent?
+
+Do not assume exactly-once delivery unless the transport guarantees it.
+
+Use trajectory IDs/idempotency keys when needed.
+
+## Failure semantics
+
+A failed rollout must have an explicit outcome.
+
+Distinguish, where relevant:
+- cancelled
+- timed out
+- environment failure
+- inference failure
+- transport failure
+- invalid trajectory
+- worker shutdown
+
+Do not silently treat partial trajectories as successful unless the algorithm explicitly supports them.
+
+## Reproducibility
+
+When deterministic execution is requested:
+- explicitly control seeds
+- record relevant configuration
+- make worker/process identity explicit
+- document unavoidable nondeterminism
+
+## Observability
+
+At minimum, design for measurement of:
+- rollout throughput
+- rollout latency
+- inference latency
+- environment latency
+- queue depth
+- queue wait time
+- trajectory size
+- dropped trajectories
+- failed trajectories
+- retry count
+- cancellation count
+- worker utilization
+
+Separate compute, queueing, network, and serialization time where possible.
+
+## Performance
+
+Optimize based on measurements.
+
+For hot paths consider:
+- batching
+- minimizing serialization
+- avoiding unnecessary copies
+- minimizing synchronization
+- allocation-aware data structures
+
+Correctness and debuggability take precedence over micro-optimizations.
+
+## Concurrency changes
+
+When modifying rollout concurrency, explicitly reason about:
+- ownership
+- cancellation
+- shutdown
+- backpressure
+- failure semantics
+- observability
+
+Add regression tests for changed invariants.
