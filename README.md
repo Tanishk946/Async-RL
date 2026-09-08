@@ -14,6 +14,7 @@ This GitHub copy is not a substitute for cluster-scale training. It is the plumb
 
 | Path | Role |
 | --- | --- |
+| `architecture.md` | End-to-end design and Phase 1 design choices |
 | `manager/` | Go rollout manager: fan-out to vLLM, score env, return groups |
 | `trainer/async_rl/` | Python client, GRPO, optional LoRA train step |
 | `configs/phase1.yaml` | Model, G=4, sampling, LoRA, KL off |

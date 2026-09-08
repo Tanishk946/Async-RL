@@ -1,0 +1,58 @@
+---
+description: Go engineering standards for rollout orchestration and infrastructure
+globs:
+  - "**/*.go"
+alwaysApply: false
+---
+
+# Go Engineering
+
+- Follow idiomatic Go.
+- Run gofmt on modified files.
+- Prefer simple code over premature abstraction.
+- Keep interfaces small and define them where consumed.
+- Avoid unnecessary generics and framework layers.
+
+## Errors
+
+- Handle errors explicitly.
+- Wrap errors with useful context using `%w`.
+- Never discard an error without a documented reason.
+- Avoid panic in production request paths.
+
+## Context
+
+- Pass `context.Context` through operation boundaries.
+- Never store context in long-lived structs.
+- Respect cancellation and deadlines.
+- Do not create background contexts merely to bypass cancellation.
+
+## Goroutines
+
+Every goroutine must have:
+- a clear owner
+- a termination condition
+- a shutdown/cancellation mechanism when appropriate
+
+Never create unmanaged fire-and-forget goroutines.
+
+## Channels
+
+- Define channel ownership clearly.
+- The sender owns channel closure.
+- Avoid closing channels from receivers.
+- Prefer communication over shared mutable state where appropriate.
+
+## Concurrency
+
+- Use bounded worker pools for rollout workloads.
+- Avoid unbounded goroutine creation.
+- Protect shared state explicitly.
+- Run the race detector for concurrency-sensitive changes.
+- Do not hold locks across slow I/O unless explicitly justified.
+
+## Testing
+
+- Prefer table-driven tests where useful.
+- Test error paths, cancellation, and shutdown.
+- Run `go test -race` for concurrency-sensitive changes.
