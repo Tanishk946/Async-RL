@@ -1,0 +1,34 @@
+# Phase 1 CPU-friendly defaults: smaller batches / shorter seqs for ~8GB RAM.
+# Tokenizer/chat template live only in the Python trainer.
+
+model:
+  name: Qwen/Qwen2.5-0.5B-Instruct
+  lora_r: 8
+  lora_alpha: 16
+  lora_dropout: 0.0
+  target_modules: [q_proj, v_proj]
+  max_seq_len: 256
+
+rollout:
+  manager_url: http://127.0.0.1:8080
+  vllm_url: http://127.0.0.1:8000/v1
+  vllm_model: Qwen/Qwen2.5-0.5B-Instruct
+  group_size: 2
+  prompts_per_step: 2
+  max_tokens: 32
+  temperature: 0.8
+  top_p: 0.95
+  stop: ["<|im_end|>", "<|endoftext|>"]
+
+env:
+  name: addition
+  addend_min: 0
+  addend_max: 50
+
+train:
+  lr: 1.0e-5
+  clip_eps: 0.2
+  kl_coeff: 0.0
+  max_grad_norm: 1.0
+  policy_version: "v0"
+  checkpoint_dir: checkpoints/phase1_cpu
