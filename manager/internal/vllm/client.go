@@ -24,7 +24,7 @@ func New(baseURL, model string) *Client {
 		baseURL: strings.TrimRight(baseURL, "/"),
 		model:   model,
 		httpClient: &http.Client{
-			Timeout: 120 * time.Second,
+			Timeout: 900 * time.Second,
 		},
 	}
 }
